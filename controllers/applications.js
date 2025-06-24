@@ -79,5 +79,41 @@ router.get('/', async (req, res) => {
     }
   });
 
+  router.get('/:applicationId/edit', async (req, res) => {
+    try {
+      // Look up the user from req.session
+      const currentUser = await User.findById(req.session.user._id);
+      // Find the application by the applicationId supplied from req.params
+      const application = currentUser.applications.id(req.params.applicationId);
+      // Render the edit view, passing the application data in the context object
+      res.render('applications/edit.ejs', {
+        application: application,
+      });
+    } catch (error) {
+      // If any errors, log them and redirect back home
+      console.log(error);
+      res.redirect('/');
+    }
+  });
+
+  router.put('/:applicationId', async (req, res) => {
+    try {
+      // Look up the user from req.session
+      const currentUser = await User.findById(req.session.user._id);
+      // Find the application by the applicationId supplied from req.params
+      const application = currentUser.applications.id(req.params.applicationId);
+      // Update the application with the data from req.body
+      application.set(req.body);
+      // Save changes to the user
+      await currentUser.save();
+      // Redirect back to the applications index view
+      res.redirect(`/users/${currentUser._id}/applications/${application._id}`);
+    } catch (error) {
+      // If any errors, log them and redirect back home
+      console.log(error);
+      res.redirect('/');
+    }
+  });
+
 
 module.exports = router;
